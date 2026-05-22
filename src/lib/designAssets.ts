@@ -10,9 +10,9 @@ export const lifestyleImages = {
   newDrop:
     "/images/new-arrivals.jpg",
   sale:
-    "/images/quality-section.jpg",
-  story:
     "/images/cod-banner.jpg",
+  story:
+    "/images/quality-section.jpg",
 };
 
 export function categoryImage(slug?: string | null) {
