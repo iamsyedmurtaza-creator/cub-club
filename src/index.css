@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #23201d;
+  background: #fffdf7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: "Poppins", system-ui, sans-serif;
+  background: #fffdf7;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  max-width: 100%;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1220px] px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-pad {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.26em] text-honey;
+  }
+
+  .section-title {
+    @apply font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl;
+  }
+
+  .section-subtitle {
+    @apply mt-2 text-sm font-medium leading-7 text-ink/55 sm:text-base;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-none bg-ink px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-honey active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-none border border-ink/15 bg-white px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-ink shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-honey hover:text-honey active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-soft {
+    @apply inline-flex items-center justify-center rounded-none bg-cream px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-ink transition hover:bg-butter;
+  }
+
+  .card-soft {
+    @apply rounded-none bg-white shadow-store ring-1 ring-black/5;
+  }
+
+  .input-soft {
+    @apply w-full rounded-none border border-black/10 bg-white px-4 py-3 text-sm font-medium text-ink outline-none transition placeholder:text-ink/35 focus:border-honey focus:ring-4 focus:ring-butter/45;
+  }
+
+  .label-soft {
+    @apply mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-ink/45;
+  }
+
+  .badge-soft {
+    @apply rounded-none bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink shadow-sm ring-1 ring-black/5;
+  }
+
+  .admin-card {
+    @apply rounded-none bg-white p-5 shadow-store ring-1 ring-black/5;
+  }
+
+  .image-cover {
+    @apply h-full w-full object-cover transition duration-700 group-hover:scale-105;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::selection {
+  background: #f7c442;
+  color: #1f1a16;
+}
+
+/* Mobile-first fixes for the Cub Club hero and global overflow */
+html,
+body,
+#root {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.hero-title {
+  display: grid;
+  gap: 0.02em;
+  font-size: clamp(2.55rem, 13.2vw, 5.8rem);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.hero-title span {
+  display: block;
+  white-space: nowrap;
+}
+
+.hero-image {
+  height: clamp(280px, 58vw, 430px);
+}
+
+@media (min-width: 1024px) {
+  .hero-image {
+    height: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-title {
+    font-size: clamp(2.25rem, 12.4vw, 2.9rem);
+    letter-spacing: -0.055em;
+  }
+
+  .container-page {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+}
