@@ -176,6 +176,13 @@ export async function setProductActive(productId: string, isActive: boolean) {
   if (error) throw error;
 }
 
+export async function deleteProduct(productId: string) {
+  // Remove gallery images first (in case the FK isn't set to cascade).
+  await supabase.from("product_images").delete().eq("product_id", productId);
+  const { error } = await supabase.from("products").delete().eq("id", productId);
+  if (error) throw error;
+}
+
 export async function uploadProductImage(file: File) {
   const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-").toLowerCase();
   const path = `products/${Date.now()}-${safeName}`;
