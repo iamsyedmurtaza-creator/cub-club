@@ -1,0 +1,4 @@
+# SPA fallback for client-side routing (React Router).
+# Netlify serves real files (assets, sitemap.xml, robots.txt) first,
+# then falls back to index.html so deep links don't 404.
+/*    /index.html   200
