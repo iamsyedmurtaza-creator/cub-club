@@ -91,42 +91,42 @@ export async function createOrder(input: {
   items: CartItem[];
   deliveryFee: number;
 }) {
-  const subtotal = input.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const total = subtotal + input.deliveryFee;
-  const { data: order, error: orderError } = await supabase.from("orders").insert({
-    user_id: input.userId ?? null,
-    customer_name: input.customerName,
-    customer_phone: input.customerPhone,
-    customer_email: input.customerEmail || null,
-    delivery_address: input.deliveryAddress,
-    city: input.city,
-    notes: input.notes || null,
-    payment_method: "cash_on_delivery",
-    status: "pending",
-    subtotal,
-    delivery_fee: input.deliveryFee,
-    total,
-  }).select("*").single();
-  if (orderError) throw orderError;
+  // Sample/fallback products only exist client-side (shown when the database
+  // is unreachable). They have no real stock and cannot be ordered.
+  if (input.items.some((item) => item.product.id.startsWith("demo-"))) {
+    throw new Error("Please refresh the page — some items could not be loaded from the store.");
+  }
 
-  const orderItems = input.items.map((item) => ({
-    order_id: order.id,
-    product_id: item.product.id.startsWith("demo-") ? null : item.product.id,
-    product_name: item.product.name,
-    product_sku: item.product.sku,
-    size: item.product.size,
-    color: item.product.color,
-    quantity: item.quantity,
-    unit_price: item.product.price,
-    line_total: item.product.price * item.quantity,
-  }));
-  const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-  if (itemsError) throw itemsError;
-  return normalizeOrder(order);
+  // place_order validates stock, prices items from the database and decrements
+  // stock atomically in a single transaction (see supabase-security-and-stock.sql).
+  const { data, error } = await supabase.rpc("place_order", {
+    p_user_id: input.userId ?? null,
+    p_customer_name: input.customerName,
+    p_customer_phone: input.customerPhone,
+    p_customer_email: input.customerEmail || null,
+    p_delivery_address: input.deliveryAddress,
+    p_city: input.city,
+    p_notes: input.notes || null,
+    p_delivery_fee: input.deliveryFee,
+    p_items: input.items.map((item) => ({ product_id: item.product.id, quantity: item.quantity })),
+  });
+  if (error) throw error;
+  return normalizeOrder(data);
 }
 
-export async function fetchUserOrders() {
-  const { data, error } = await supabase.from("orders").select("*, order_items(*)").order("created_at", { ascending: false });
+export async function updateProfile(userId: string, fields: { full_name: string; phone: string; address: string; city: string }) {
+  const { error } = await supabase
+    .from("profiles")
+    .upsert({ id: userId, ...fields }, { onConflict: "id" });
+  if (error) throw error;
+}
+
+export async function fetchUserOrders(userId: string) {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*, order_items(*)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []).map(normalizeOrder);
 }
@@ -202,4 +202,9 @@ export async function saveCategory(input: Partial<Category> & { name: string; sl
   const { data, error } = await supabase.from("categories").insert(payload).select("id").single();
   if (error) throw error;
   return data.id as string;
+}
+
+export async function deleteCategory(id: string) {
+  const { error } = await supabase.from("categories").delete().eq("id", id);
+  if (error) throw error;
 }

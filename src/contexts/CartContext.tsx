@@ -42,14 +42,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
       deliveryFee,
       total,
       addItem(product, quantity = 1) {
+        if (product.stock_quantity <= 0) {
+          toast.error(`${product.name} is sold out`);
+          return;
+        }
+        let capped = false;
         setItems((current) => {
           const existing = current.find((item) => item.product.id === product.id);
           if (existing) {
-            return current.map((item) => item.product.id === product.id ? { ...item, quantity: Math.min(item.quantity + quantity, Math.max(product.stock_quantity, 1)) } : item);
+            const next = Math.min(existing.quantity + quantity, product.stock_quantity);
+            capped = next < existing.quantity + quantity;
+            return current.map((item) => item.product.id === product.id ? { ...item, product, quantity: next } : item);
           }
-          return [...current, { product, quantity }];
+          const next = Math.min(quantity, product.stock_quantity);
+          capped = next < quantity;
+          return [...current, { product, quantity: next }];
         });
-        toast.success(`${product.name} added to cart`);
+        toast[capped ? "warning" : "success"](capped ? `Only ${product.stock_quantity} of ${product.name} in stock` : `${product.name} added to cart`);
       },
       removeItem(productId) {
         setItems((current) => current.filter((item) => item.product.id !== productId));
@@ -59,7 +68,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           setItems((current) => current.filter((item) => item.product.id !== productId));
           return;
         }
-        setItems((current) => current.map((item) => item.product.id === productId ? { ...item, quantity: Math.min(quantity, Math.max(item.product.stock_quantity, 1)) } : item));
+        setItems((current) => current.map((item) => item.product.id === productId ? { ...item, quantity: Math.max(1, Math.min(quantity, item.product.stock_quantity)) } : item));
       },
       clearCart() { setItems([]); },
     };

@@ -5,12 +5,39 @@ import ProductArt from "../components/ProductArt";
 import QuantitySelector from "../components/QuantitySelector";
 import { useCart } from "../contexts/CartContext";
 import { fetchProductBySlug, fetchProductImages } from "../lib/storeApi";
+import { storeConfig } from "../lib/storeConfig";
+import { useSeo } from "../lib/useSeo";
 import { Product, ProductImage } from "../types";
 import { formatPKR } from "../utils/format";
 export default function ProductDetail() {
   const { slug } = useParams(); const [product, setProduct] = useState<Product | null>(null); const [images, setImages] = useState<ProductImage[]>([]); const [loading, setLoading] = useState(true); const [quantity, setQuantity] = useState(1); const [selectedImage, setSelectedImage] = useState<string | null>(null); const { addItem } = useCart();
   useEffect(() => { if (!slug) return; setLoading(true); fetchProductBySlug(slug).then(async (p) => { setProduct(p); if (p?.id && !p.id.startsWith("demo-")) { const imgs = await fetchProductImages(p.id); setImages(imgs); setSelectedImage(p.main_image_url ?? imgs[0]?.image_url ?? null); } else setSelectedImage(p?.main_image_url ?? null); }).finally(() => setLoading(false)); }, [slug]);
   const gallery = useMemo(() => Array.from(new Set([product?.main_image_url, ...images.map((i) => i.image_url)].filter(Boolean) as string[])), [images, product]);
+  const productJsonLd = useMemo(() => product ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description || product.short_description || undefined,
+    image: gallery.length ? gallery : undefined,
+    sku: product.sku || undefined,
+    category: product.categories?.name || undefined,
+    brand: { "@type": "Brand", name: storeConfig.name },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "PKR",
+      price: product.price,
+      availability: product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      ...(storeConfig.siteUrl ? { url: `${storeConfig.siteUrl}/product/${product.slug}` } : {}),
+    },
+  } : null, [product, gallery]);
+  useSeo({
+    title: product?.name,
+    description: product?.short_description || product?.description || undefined,
+    image: product?.main_image_url || undefined,
+    path: product ? `/product/${product.slug}` : undefined,
+    type: "product",
+    jsonLd: productJsonLd,
+  });
   if (loading) return <div className="container-page py-12"><div className="h-[620px] animate-pulse rounded-[3rem] bg-white/70 shadow-card" /></div>;
   if (!product) return <div className="container-page py-12"><div className="card-soft p-10 text-center"><p className="text-5xl">🧸</p><h1 className="mt-4 font-display text-3xl font-bold text-cocoa">Product not found</h1><Link to="/shop" className="btn-primary mt-6">Back to shop</Link></div></div>;
   const isOut = product.stock_quantity <= 0;

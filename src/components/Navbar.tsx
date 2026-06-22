@@ -74,7 +74,7 @@ export default function Navbar() {
           </Link>
           {user ? (
             <div className="hidden items-center gap-2 md:flex">
-              <Link to={isAdmin ? "/admin" : "/my-orders"} className="btn-secondary py-3">
+              <Link to={isAdmin ? "/admin" : "/account"} className="btn-secondary py-3">
                 {isAdmin ? "Admin" : "Account"}
               </Link>
               <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-ink transition hover:border-honey hover:text-honey">
@@ -97,8 +97,8 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
-            <Link to={user ? (isAdmin ? "/admin" : "/my-orders") : "/login"} onClick={() => setOpen(false)} className="bg-ink px-4 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white">
-              {user ? (isAdmin ? "Admin Dashboard" : "My Orders") : "Login / Signup"}
+            <Link to={user ? (isAdmin ? "/admin" : "/account") : "/login"} onClick={() => setOpen(false)} className="bg-ink px-4 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white">
+              {user ? (isAdmin ? "Admin Dashboard" : "My Account") : "Login / Signup"}
             </Link>
           </div>
         </div>

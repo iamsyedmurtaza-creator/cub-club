@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /cart
+Disallow: /login
+Disallow: /signup
+Disallow: /my-orders
+Disallow: /order-success
+
+# Replace with your production domain.
+Sitemap: https://www.cubclub.pk/sitemap.xml

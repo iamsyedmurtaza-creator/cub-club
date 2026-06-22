@@ -1,7 +1,10 @@
-import { Facebook, Instagram, Mail } from "lucide-react";
+import { Facebook, Instagram, Mail, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { storeConfig } from "../lib/storeConfig";
+import { contactWhatsAppLink } from "../lib/whatsapp";
 
 export default function Footer() {
+  const waLink = contactWhatsAppLink();
   return (
     <footer className="border-t border-black/5 bg-cream pb-28 pt-12 md:pb-10">
       <div className="container-page grid gap-10 md:grid-cols-[1.25fr_1fr_1fr_1fr]">
@@ -37,10 +40,19 @@ export default function Footer() {
         <div>
           <h4 className="text-xs font-black uppercase tracking-[0.18em] text-ink">Contact</h4>
           <div className="mt-4 grid gap-3 text-sm font-medium text-ink/60">
-            <a href="mailto:cubclub.official@gmail.com" className="flex items-center gap-2 hover:text-honey"><Mail size={16} /> cubclub.official@gmail.com</a>
+            <a href={`mailto:${storeConfig.email}`} className="flex items-center gap-2 hover:text-honey"><Mail size={16} /> {storeConfig.email}</a>
+            {waLink ? <a href={waLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-honey"><MessageCircle size={16} /> Chat on WhatsApp</a> : null}
             <div className="mt-2 flex gap-2">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink"><Instagram size={18} /></span>
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink"><Facebook size={18} /></span>
+              {storeConfig.instagramUrl ? (
+                <a href={storeConfig.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink transition hover:text-honey"><Instagram size={18} /></a>
+              ) : (
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink"><Instagram size={18} /></span>
+              )}
+              {storeConfig.facebookUrl ? (
+                <a href={storeConfig.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink transition hover:text-honey"><Facebook size={18} /></a>
+              ) : (
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink"><Facebook size={18} /></span>
+              )}
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { ArrowRight, Headphones, RotateCcw, ShieldCheck, Shirt, Sparkles, Truck 
 import ProductCard from "../components/ProductCard";
 import { lifestyleImages } from "../lib/designAssets";
 import { fetchProducts } from "../lib/storeApi";
+import { useSeo } from "../lib/useSeo";
 import { Product } from "../types";
 
 const reveal = {
@@ -22,6 +23,12 @@ const collections = [
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useSeo({
+    description: "Shop export-quality kids garments in Pakistan — soft, stylish everyday outfits for girls, boys and infants with cash on delivery.",
+    image: lifestyleImages.hero,
+    path: "/",
+  });
 
   useEffect(() => {
     fetchProducts({ featured: true })

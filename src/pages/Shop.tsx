@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import ProductCard from "../components/ProductCard";
 import { categoryImage, lifestyleImages } from "../lib/designAssets";
 import { fetchCategories, fetchProducts } from "../lib/storeApi";
+import { useSeo } from "../lib/useSeo";
 import { Category, Product } from "../types";
 
 export default function Shop() {
@@ -14,6 +15,9 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
   const search = searchParams.get("q") ?? "";
   const sort = (searchParams.get("sort") as "newest" | "price_asc" | "price_desc") || "newest";
+  const sizeFilter = searchParams.get("size") ?? "";
+  const colorFilter = searchParams.get("color") ?? "";
+  const ageFilter = searchParams.get("age") ?? "";
 
   useEffect(() => {
     setLoading(true);
@@ -28,6 +32,39 @@ export default function Shop() {
   const activeCategory = useMemo(() => categories.find((c) => c.slug === categorySlug), [categories, categorySlug]);
   const title = activeCategory?.name ?? "Shop Cub Club";
   const heroImage = activeCategory ? categoryImage(activeCategory.slug) : lifestyleImages.hero;
+
+  const uniqueValues = (pick: (p: Product) => string | null) =>
+    Array.from(new Set(products.map(pick).filter((v): v is string => !!v))).sort();
+  const sizes = useMemo(() => uniqueValues((p) => p.size), [products]);
+  const colors = useMemo(() => uniqueValues((p) => p.color), [products]);
+  const ages = useMemo(() => uniqueValues((p) => p.age_range), [products]);
+
+  const visibleProducts = useMemo(
+    () =>
+      products.filter(
+        (p) =>
+          (!sizeFilter || p.size === sizeFilter) &&
+          (!colorFilter || p.color === colorFilter) &&
+          (!ageFilter || p.age_range === ageFilter),
+      ),
+    [products, sizeFilter, colorFilter, ageFilter],
+  );
+  const filtersActive = Boolean(sizeFilter || colorFilter || ageFilter);
+
+  function clearFilters() {
+    const next = new URLSearchParams(searchParams);
+    next.delete("size");
+    next.delete("color");
+    next.delete("age");
+    setSearchParams(next);
+  }
+
+  useSeo({
+    title: activeCategory ? `${activeCategory.name} Kids Garments` : "Shop Kids Garments",
+    description: activeCategory?.description || "Browse export-quality kids garments — girls, boys and infant clothing with cash on delivery across Pakistan.",
+    image: heroImage,
+    path: categorySlug ? `/category/${categorySlug}` : "/shop",
+  });
 
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
@@ -53,13 +90,40 @@ export default function Shop() {
       </section>
 
       <div className="container-page -mt-8 relative z-10">
-        <div className="grid gap-3 bg-white p-4 shadow-soft ring-1 ring-black/5 md:grid-cols-[1fr_220px]">
-          <input value={search} onChange={(e) => updateParam("q", e.target.value)} placeholder="Search products..." className="input-soft" />
-          <select value={sort} onChange={(e) => updateParam("sort", e.target.value)} className="input-soft">
-            <option value="newest">Newest</option>
-            <option value="price_asc">Price: low to high</option>
-            <option value="price_desc">Price: high to low</option>
-          </select>
+        <div className="grid gap-3 bg-white p-4 shadow-soft ring-1 ring-black/5">
+          <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+            <input value={search} onChange={(e) => updateParam("q", e.target.value)} placeholder="Search products..." className="input-soft" />
+            <select value={sort} onChange={(e) => updateParam("sort", e.target.value)} className="input-soft">
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+            </select>
+          </div>
+          {(sizes.length || colors.length || ages.length) ? (
+            <div className="flex flex-wrap items-center gap-3">
+              {sizes.length ? (
+                <select value={sizeFilter} onChange={(e) => updateParam("size", e.target.value)} className="input-soft w-auto min-w-36">
+                  <option value="">All sizes</option>
+                  {sizes.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              ) : null}
+              {colors.length ? (
+                <select value={colorFilter} onChange={(e) => updateParam("color", e.target.value)} className="input-soft w-auto min-w-36">
+                  <option value="">All colors</option>
+                  {colors.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              ) : null}
+              {ages.length ? (
+                <select value={ageFilter} onChange={(e) => updateParam("age", e.target.value)} className="input-soft w-auto min-w-36">
+                  <option value="">All ages</option>
+                  {ages.map((a) => <option key={a} value={a}>{a}</option>)}
+                </select>
+              ) : null}
+              {filtersActive ? (
+                <button onClick={clearFilters} className="text-xs font-bold uppercase tracking-[0.14em] text-cocoa/55 underline-offset-4 hover:text-honey hover:underline">Clear filters</button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -79,9 +143,9 @@ export default function Shop() {
               <div key={i} className="h-80 animate-pulse bg-white shadow-store" />
             ))}
           </div>
-        ) : products.length ? (
+        ) : visibleProducts.length ? (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((product) => (
+            {visibleProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -89,7 +153,8 @@ export default function Shop() {
           <div className="bg-white p-12 text-center shadow-store">
             <p className="text-5xl">🧸</p>
             <h2 className="mt-4 text-3xl font-black uppercase tracking-[-0.03em] text-ink">No products found</h2>
-            <p className="mt-2 text-sm font-medium text-ink/55">Try another category or search term.</p>
+            <p className="mt-2 text-sm font-medium text-ink/55">{filtersActive ? "Try clearing some filters." : "Try another category or search term."}</p>
+            {filtersActive ? <button onClick={clearFilters} className="btn-secondary mt-5">Clear filters</button> : null}
           </div>
         )}
       </div>
