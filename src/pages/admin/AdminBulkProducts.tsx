@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle2, ImagePlus, Loader2, Trash2, UploadCloud } from "lucide-react";
+import { CheckCircle2, Crop, ImagePlus, Loader2, Trash2, UploadCloud } from "lucide-react";
 import { fetchCategories, saveProduct, uploadProductImage } from "../../lib/storeApi";
+import ImageCropModal from "../../components/ImageCropModal";
 import { Category } from "../../types";
 import { slugify } from "../../utils/format";
 
@@ -44,6 +45,7 @@ export default function AdminBulkProducts() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [adjustingId, setAdjustingId] = useState<string | null>(null);
   const [defaults, setDefaults] = useState({ categoryId: "", stock: "1" });
 
   useEffect(() => {
@@ -95,6 +97,16 @@ export default function AdminBulkProducts() {
       if (target) URL.revokeObjectURL(target.preview);
       return current.filter((d) => d.id !== id);
     });
+  }
+
+  function applyCrop(id: string, file: File) {
+    setDrafts((current) =>
+      current.map((d) => {
+        if (d.id !== id) return d;
+        URL.revokeObjectURL(d.preview);
+        return { ...d, file, preview: URL.createObjectURL(file) };
+      }),
+    );
   }
 
   function applyDefaultsToAll() {
@@ -225,6 +237,11 @@ export default function AdminBulkProducts() {
                       <span className="text-xs font-extrabold uppercase tracking-[0.14em]">{draft.status}</span>
                     </div>
                   ) : null}
+                  {(draft.status === "idle" || draft.status === "error") ? (
+                    <button type="button" onClick={() => setAdjustingId(draft.id)} className="absolute inset-x-2 bottom-2 inline-flex items-center justify-center gap-1 rounded-full bg-white/90 py-1.5 text-xs font-bold text-cocoa shadow-sm transition hover:bg-white">
+                      <Crop size={13} /> Adjust
+                    </button>
+                  ) : null}
                 </div>
 
                 <div className="grid gap-3">
@@ -283,6 +300,18 @@ export default function AdminBulkProducts() {
           </div>
         </>
       ) : null}
+
+      {adjustingId ? (() => {
+        const adjusting = drafts.find((d) => d.id === adjustingId);
+        if (!adjusting) return null;
+        return (
+          <ImageCropModal
+            file={adjusting.file}
+            onCancel={() => setAdjustingId(null)}
+            onApply={(file) => { applyCrop(adjusting.id, file); setAdjustingId(null); }}
+          />
+        );
+      })() : null}
     </div>
   );
 }

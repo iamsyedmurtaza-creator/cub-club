@@ -15,7 +15,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group bg-white transition duration-300 hover:-translate-y-1">
       <Link to={`/product/${product.slug}`} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden bg-[#f7f7f3] shadow-store">
+        <div className="relative aspect-square overflow-hidden bg-[#f7f7f3] shadow-store">
           <ProductArt imageUrl={product.main_image_url} title={product.name} categoryName={product.categories?.name} />
           <div className="absolute left-3 top-3 flex flex-col gap-2">
             {product.is_featured ? <span className="bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">New</span> : null}
