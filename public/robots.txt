@@ -8,5 +8,4 @@ Disallow: /signup
 Disallow: /my-orders
 Disallow: /order-success
 
-# Replace with your production domain.
-Sitemap: https://www.cubclub.pk/sitemap.xml
+Sitemap: https://cubclubpk.com/sitemap.xml

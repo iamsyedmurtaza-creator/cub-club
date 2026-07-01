@@ -3,3 +3,6 @@ dist
 .env
 .env.local
 .DS_Store
+
+# Generated at build time by scripts/generate-sitemap.mjs (prebuild)
+public/sitemap.xml
